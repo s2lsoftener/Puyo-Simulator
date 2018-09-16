@@ -1,6 +1,10 @@
 <template>
-  <div id="GameFieldCell" v-bind:style="PuyoStyling" ondragstart="return false;">
-    <div class="puyo"></div>
+  <div id="GameFieldCell" v-bind:style="PuyoStyling" @mousedown="setNewPuyoOnMouseDown" @mouseover="setNewPuyoOnMove" ondragstart="return false;">
+    <div class="puyo-container">
+      <div class="puyo-sub-container">
+        <div class="puyo"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -11,7 +15,8 @@ import TweenMax from 'gsap'
 
 export default {
   name: 'GameFieldCell',
-  props: ['indexRow', 'indexCol', 'isMouseDown', 'Simulator', 'fieldState', 'fieldData'],
+  props: ['indexRow', 'indexCol', 'isMouseDown', 'Simulator', 'fieldState', 'fieldData', 'scaling', 'windowHeight',
+    'simulationSpeed'],
   data () {
     return {
       check: {}
@@ -26,25 +31,33 @@ export default {
     endOfDropAnimation: function () {
       this.$emit('end-dropping', { x: this.indexCol, y: this.indexRow, bool: false })
       console.log('emitted drop animation end')
+    },
+    setNewPuyoOnMouseDown: function () {
+      this.$emit('edit-puyo-field', { x: this.indexCol, y: this.indexRow, puyo: this.currentTool })
+    },
+    setNewPuyoOnMove: function () {
+      if (this.isMouseDown === true) {
+        this.$emit('edit-puyo-field', { x: this.indexCol, y: this.indexRow, puyo: this.currentTool })
+      }
     }
   },
   computed: {
-    ...mapState(['PuyoSettings']),
+    ...mapState(['PuyoSettings', 'currentTool']),
     PuyoType: function () {
       switch (this.Simulator.Field.map[this.indexRow][this.indexCol].puyo) {
         case Chainsim.Constants.Puyo.Red: return 0 // Red
-        case Chainsim.Constants.Puyo.Green: return -32 // Green
-        case Chainsim.Constants.Puyo.Blue: return -64 // Blue
-        case Chainsim.Constants.Puyo.Yellow: return -96 // Yellow
-        case Chainsim.Constants.Puyo.Purple: return -128 // Purple
-        case Chainsim.Constants.Puyo.Nuisance: return -160 // Garbage (oJama)
+        case Chainsim.Constants.Puyo.Green: return -72 // Green
+        case Chainsim.Constants.Puyo.Blue: return -144 // Blue
+        case Chainsim.Constants.Puyo.Yellow: return -216 // Yellow
+        case Chainsim.Constants.Puyo.Purple: return -288 // Purple
+        case Chainsim.Constants.Puyo.Nuisance: return -72 // Garbage (oJama)
         case Chainsim.Constants.Puyo.Point: return -192 // poinT
         case Chainsim.Constants.Puyo.Sun: return -224 // Sun
         case Chainsim.Constants.Puyo.Hard: return -256 // Hard
         case Chainsim.Constants.Puyo.Iron: return -256 // Iron
         case Chainsim.Constants.Puyo.Block: return -256 // bLock
-        case Chainsim.Constants.Puyo.None: return 32 // Spacer/Nothing
-        case undefined: return 32
+        case Chainsim.Constants.Puyo.None: return 100 // Spacer/Nothing
+        case undefined: return 100
       }
     },
     Connections: function () {
@@ -52,9 +65,11 @@ export default {
       // - If it's an Iron Puyo (I), set the offset to -32.
       // - If it's a Block (L), set the offset to -64.
       // - If it's NOT a puyo, then the only thing left it could be is nothing... hopefully. So, return 32 (out of spritesheet bound)
-      if (this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Nuisance || this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Point || this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Sun ||
+      if (this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Point || this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Sun ||
           this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Hard) {
-        return 0
+        return 100
+      } else if (this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Nuisance) {
+        return -1296
       } else if (this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Iron) {
         return -32
       } else if (this.Simulator.Field.map[this.indexRow][this.indexCol].puyo === Chainsim.Constants.Puyo.Block) {
@@ -135,35 +150,35 @@ export default {
       if (this.check.up === false && this.check.left === false && this.check.right === false && this.check.down === false) {
         return 0
       } else if (this.check.up === false && this.check.left === false && this.check.right === false && this.check.down === true) {
-        return -32
+        return -72
       } else if (this.check.up === true && this.check.left === false && this.check.right === false && this.check.down === false) {
-        return -64
+        return -144
       } else if (this.check.up === true && this.check.left === false && this.check.right === false && this.check.down === true) {
-        return -96
+        return -216
       } else if (this.check.up === false && this.check.left === false && this.check.right === true && this.check.down === false) {
-        return -128
-      } else if (this.check.up === false && this.check.left === false && this.check.right === true && this.check.down === true) {
-        return -160
-      } else if (this.check.up === true && this.check.left === false && this.check.right === true && this.check.down === false) {
-        return -192
-      } else if (this.check.up === true && this.check.left === false && this.check.right === true && this.check.down === true) {
-        return -224
-      } else if (this.check.up === false && this.check.left === true && this.check.right === false && this.check.down === false) {
-        return -256
-      } else if (this.check.up === false && this.check.left === true && this.check.right === false && this.check.down === true) {
         return -288
+      } else if (this.check.up === false && this.check.left === false && this.check.right === true && this.check.down === true) {
+        return -360
+      } else if (this.check.up === true && this.check.left === false && this.check.right === true && this.check.down === false) {
+        return -432
+      } else if (this.check.up === true && this.check.left === false && this.check.right === true && this.check.down === true) {
+        return -504
+      } else if (this.check.up === false && this.check.left === true && this.check.right === false && this.check.down === false) {
+        return -576
+      } else if (this.check.up === false && this.check.left === true && this.check.right === false && this.check.down === true) {
+        return -648
       } else if (this.check.up === true && this.check.left === true && this.check.right === false && this.check.down === false) {
-        return -320
+        return -720
       } else if (this.check.up === true && this.check.left === true && this.check.right === false && this.check.down === true) {
-        return -352
+        return -792
       } else if (this.check.up === false && this.check.left === true && this.check.right === true && this.check.down === false) {
-        return -384
+        return -864
       } else if (this.check.up === false && this.check.left === true && this.check.right === true && this.check.down === true) {
-        return -416
+        return -936
       } else if (this.check.up === true && this.check.left === true && this.check.right === true && this.check.down === false) {
-        return -448
+        return -1008
       } else if (this.check.up === true && this.check.left === true && this.check.right === true && this.check.down === true) {
-        return -480
+        return -1080
       } else {
         return 32 // Error...
       }
@@ -201,13 +216,32 @@ export default {
         }
       }
     },
+    requireBufferPixelsDown: function () {
+      // Puyos that extend right and/or down need a couple extra pixels to ensure nice looking connections
+      // when the user rescales their screen.
+      if ([-72, -216, -360, -504, -648, -792, -936, -1080].includes(this.Connections)) {
+        return '64px'
+      } else {
+        return '60px'
+      }
+    },
+    requireBufferPixelsRight: function () {
+      if ([-288, -360, -432, -504, -864, -936, -1008, -1080].includes(this.Connections)) {
+        return '68px'
+      } else {
+        return '64px'
+      }
+    },
     PuyoStyling: function () {
       return {
         '-webkit-filter': this.colorSettings['-webkit-filter'],
         'filter': this.colorSettings['filter'],
-        '--rescale': this.Simulator.Field.scaling,
+        // '--rescale': this.Simulator.Field.scaling,
+        '--rescale': this.scaling,
         '--colorOffset': this.PuyoType + 'px',
-        '--cnxOffset': this.Connections + 'px'
+        '--cnxOffset': this.Connections + 'px',
+        '--bufferRight': this.requireBufferPixelsRight,
+        '--bufferDown': this.requireBufferPixelsDown
       }
     },
     needsPopping: function () {
@@ -238,38 +272,58 @@ export default {
         TweenMax.to(this.$el.childNodes[0], 0, {useFrames: true, y: 0, opacity: 1, scaleX: 1, scaleY: 1, overwrite: 'concurrent'})
       } else if (this.fieldState === 'popping' && this.needsPopping === true) {
         let me = this
+        let flashRate = Math.round(2 / this.simulationSpeed)
+        let flashSpeed = 1
+        if (this.simulationSpeed > 4) {
+          flashSpeed = 0
+        }
+
+        // Escape function in case the animation needs to end.
+        let checkForFieldStateChange = function () {
+          if (me.fieldState === 'idle') {
+            TweenMax.to(me.$el.childNodes[0], 0, {useFrames: true, y: 0, opacity: 1, scaleX: 1, scaleY: 1, overwrite: 'concurrent', onOverwrite: me.endOfPopAnimation})
+          }
+        }
+        // Define popping animation
         let popPuyos = function () {
-          TweenMax.to(me.$el.childNodes[0], 3, {opacity: 0, useFrames: true, yoyo: true, repeat: 10, onOverwrite: me.endOfPopAnimation, onComplete: me.endOfPopAnimation})
+          TweenMax.to(me.$el.childNodes[0], flashSpeed, {opacity: 0, useFrames: true, yoyo: true, repeat: 10, repeatDelay: flashRate, onOverwrite: me.endOfPopAnimation, onUpdate: checkForFieldStateChange, onComplete: me.endOfPopAnimation})
         }
         // Reset transforms, then pop.
         TweenMax.to(this.$el.childNodes[0], 0, {useFrames: true, y: 0, opacity: 1, scaleX: 1, scaleY: 1, onComplete: popPuyos})
       } else if (this.fieldState === 'dropping' && this.needsDropping === true) {
-        let maxDistance = this.cellsToDrop * 31 * this.Simulator.Field.scaling
+        let maxDistance = (this.cellsToDrop) * 60 * this.scaling
         let me = this
         let frame = 0
-        let speed = 1
+        let speed = this.simulationSpeed
+        let accelConst = 0.1875 / 16 * (68 * this.scaling)
         let distance = 0
         let speedstring = ''
+        let checkForFieldStateChange = function () {
+          if (me.fieldState === 'idle') {
+            TweenMax.to(me.$el.childNodes[0], 0, {useFrames: true, y: 0, opacity: 1, scaleX: 1, scaleY: 1, overwrite: 'concurrent', onOverwrite: me.endOfDropAnimation})
+          }
+        }
         let accelerate = function () {
           if (distance < maxDistance) {
             frame += 1
-            speed += 0.375 * frame
+            speed += accelConst * frame * (me.simulationSpeed ** 2)
             distance += speed
             speedstring = '+=' + speed + 'px'
-            TweenMax.to(me.$el.childNodes[0], 1, {useFrames: true, y: speedstring, onOverwrite: me.endOfDropAnimation, onComplete: accelerate})
+            TweenMax.to(me.$el.childNodes[0], 1, {useFrames: true, y: speedstring, onOverwrite: me.endOfDropAnimation, onUpdate: checkForFieldStateChange, onComplete: accelerate})
           } else {
-            TweenMax.to(me.$el.childNodes[0], 0, {useFrames: true, y: maxDistance, onOverwrite: me.endOfDropAnimation, onComplete: bounce})
+            TweenMax.to(me.$el.childNodes[0], 0, {useFrames: true, y: maxDistance, onOverwrite: me.endOfDropAnimation, onUpdate: checkForFieldStateChange, onComplete: bounce})
           }
         }
         let bounce = function () {
-          let yChange = '+=' + (0.2 * 32 * me.Simulator.Field.scaling) + 'px'
-          TweenMax.to(me.$el.childNodes[0], 8, {useFrames: true, scaleX: '1.2', scaleY: '0.8', y: yChange, yoyo: true, repeat: 1, onOverwrite: me.endOfDropAnimation, onComplete: me.endOfDropAnimation})
+          let yChange = '+=' + (0.1 * 60 * me.Simulator.Field.scaling) + 'px'
+          let bounceSpeed = Math.round(8 / me.simulationSpeed)
+          TweenMax.to(me.$el.childNodes[0], bounceSpeed, {useFrames: true, scaleX: '1.2', scaleY: '0.8', y: yChange, yoyo: true, repeat: 1, onUpdate: checkForFieldStateChange, onOverwrite: me.endOfDropAnimation, onComplete: me.endOfDropAnimation})
         }
         let puyoFall = function () {
-          TweenMax.to(me.$el.childNodes[0], 1, {useFrames: true, y: '+=' + speed + 'px', onOverwrite: me.endOfDropAnimation, onComplete: accelerate})
+          TweenMax.to(me.$el.childNodes[0], 1, {useFrames: true, y: '+=' + speed + 'px', onOverwrite: me.endOfDropAnimation, onUpdate: checkForFieldStateChange, onComplete: accelerate})
         }
         // Reset transforms, then drop.
-        TweenMax.to(this.$el.childNodes[0], 0, {useFrames: true, y: 0, opacity: 1, scaleX: 1, scaleY: 1, overwrite: 'concurrent', onComplete: puyoFall})
+        TweenMax.to(this.$el.childNodes[0], 0, {useFrames: true, y: 0, opacity: 1, scaleX: 1, scaleY: 1, onUpdate: checkForFieldStateChange, overwrite: 'concurrent', onComplete: puyoFall})
       }
     },
     fieldData: {
@@ -284,24 +338,43 @@ export default {
 
 <style scoped>
 #GameFieldCell {
-  width: calc(32px * var(--rescale));
-  height: calc(32px * var(--rescale));
+  width: calc(64px * var(--rescale));
+  height: calc(60px * var(--rescale));
   display: inline-block;
   position: relative;
   -webkit-user-drag: none;
   -khtml-user-drag: none;
   -moz-user-drag: none;
   -o-user-drag: none;
+  font-size: 0;
 }
+
+.puyo-container {
+  width: calc(64px * var(--rescale));
+  height: calc(60px * var(--rescale));
+  position: relative;
+}
+
+.puyo-sub-container {
+  width: calc(var(--bufferRight) * var(--rescale));
+  height: calc(var(--bufferDown) * var(--rescale));
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
 .puyo {
-  background-image: url('../assets/puyo/32x32/aqua.png');
-  width: calc(32px * var(--rescale));
-  height: calc(32px * var(--rescale));
+  background-image: url('../assets/puyo/puyo_aqua.png');
+  width: calc(72px * var(--rescale));
+  height: calc(68px * var(--rescale));
   --multiplyposition: calc(var(--cnxOffset) * var(--rescale));
   --multiplycolor: calc(var(--colorOffset) * var(--rescale));
   background-position: var(--multiplyposition) var(--multiplycolor);
-  background-size: 1600%;
   position: absolute;
+  background-size: 2844.4444%;
+  left: 0;
+  top: 0;
 }
 
 </style>

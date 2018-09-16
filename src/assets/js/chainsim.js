@@ -106,8 +106,8 @@ const Field = function (settings, textArray) {
   this.columns = settings.columns
   this.hiddenRows = settings.hiddenRows
   this.totalRows = settings.visibleRows + settings.hiddenRows
-  this.cellWidth = 32 // pixels
-  this.cellHeight = 32 // pixels
+  this.cellWidth = 68 // pixels
+  this.cellHeight = 60 // pixels
   this.puyoToClear = 4
   this.fieldWidthPx = this.cellWidth * (this.columns + 2)
   this.fieldHeightPx = this.cellHeight * (this.visibleRows + this.hiddenRows + 2)
@@ -378,6 +378,26 @@ const Simulate = {
     }
     return {dropResult: dropResult, dropDistances: dropDistances}
   }
+  // fullChain: function (field) {
+  //   let totalScore = 0
+  //   let totalNuisance = 0
+  //   let chainLength = 0
+  //   let chainSteps = []
+  //   let currentSlide = 0
+
+  //   // Push the initial chain as chainStep 1
+  //   chainSteps.push({
+  //     chain: this.dropPuyos(field).dropResult,
+  //     chainLength: 0,
+  //     linkScore: 0,
+  //     totalScore: 0
+  //   })
+  //   currentSlide += 1
+
+  //   // Loop over the rest of the chains
+  //   for (let i = 0; i < chainSteps.length; i++) {
+  //   }
+  // }
 }
 
 const mapToStringArray = function (map) {
