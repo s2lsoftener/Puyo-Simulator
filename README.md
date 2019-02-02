@@ -2,6 +2,11 @@
 
 > A new Puyo Puyo simulator
 
+One of my first attempts at making a Puyo Puyo chain simulator. I tried making it with GSAP and vue.js, but all the DOM updates really lagged in certain web browsers. If you want to see more functional chain simulators, see:
+
+* Vue.js/VuePress guide website: https://github.com/s2lsoftener/PuyoGuides
+* TypeScript rewrite (latest attempt): https://github.com/s2lsoftener/puyosim-ts
+
 ## Build Setup
 
 ``` bash
